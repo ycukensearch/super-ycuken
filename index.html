@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Супер Йцукен</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Roboto',Arial,sans-serif;background:#fafafa;color:#212121;padding:20px;min-height:100vh}
+  .wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+  .card{background:#fff;border-radius:2px;box-shadow:0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12);padding:16px 20px}
+  h1{font-size:20px;font-weight:500;color:#fff;background:#ff9800;padding:14px 20px;border-radius:2px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12)}
+  h1 .material-icons{font-size:26px}
+
+  #authBox{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+  #authBox .status{display:flex;align-items:center;gap:8px;font-size:15px;color:#424242}
+  #authBox .status .material-icons{color:#ff9800;font-size:32px}
+  #authBox .forms{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  #authBox input{border:0;border-bottom:1px solid #9e9e9e;padding:8px 4px;font:400 14px 'Roboto',sans-serif;outline:0;background:transparent;min-width:140px}
+  #authBox input:focus{border-bottom:2px solid #ff9800;margin-bottom:-1px}
+  #logoutBox{display:none;align-items:center;gap:12px}
+
+  .btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:2px;padding:9px 16px;font:500 13px 'Roboto',sans-serif;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;background:#ff9800;color:#fff;box-shadow:0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12)}
+  .btn:hover{background:#f57c00}
+  .btn:active{background:#ef6c00}
+  .btn.accent{background:#f4511e}
+  .btn.accent:hover{background:#e64a19}
+  .btn.accent:active{background:#d84315}
+  .btn.flat{background:transparent;color:#ff9800;box-shadow:none}
+  .btn.flat:hover{background:rgba(255,152,0,.1)}
+  .btn.flat:active{background:rgba(255,152,0,.18)}
+  .btn .material-icons{font-size:18px}
+
+  .searchRow{display:flex;gap:8px;align-items:center;margin-bottom:14px}
+  .searchRow .material-icons{color:#ff9800;font-size:24px}
+  .searchRow input{flex:1;border:0;outline:0;background:transparent;font:400 16px 'Roboto',sans-serif;padding:12px 4px;color:#212121}
+
+  .tabs{display:flex;border-bottom:1px solid #e0e0e0}
+  .tab{flex:1;background:transparent;border:0;padding:12px 0;font:500 13px 'Roboto',sans-serif;text-transform:uppercase;letter-spacing:.5px;color:#616161;cursor:pointer;border-bottom:2px solid transparent}
+  .tab:hover{background:rgba(255,152,0,.06);color:#f57c00}
+  .tab.active{color:#ff9800;border-bottom-color:#ff9800}
+
+  #frameWrap{display:none;margin-top:16px}
+  #frameWrap.open{display:block}
+  .frameHead{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #e0e0e0;margin-bottom:10px;font-weight:500;color:#424242}
+  iframe{width:100%;height:600px;border:1px solid #e0e0e0;border-radius:2px;background:#fff;display:block}
+
+  .histHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .histHead h2{font-size:16px;font-weight:500;color:#424242;display:flex;align-items:center;gap:8px}
+  .histHead .material-icons{font-size:20px;color:#ff9800}
+  #histList{display:flex;flex-wrap:wrap;gap:8px;list-style:none}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:#eeeeee;border-radius:16px;padding:6px 6px 6px 14px;font:400 14px 'Roboto',sans-serif;color:#424242;cursor:pointer;transition:background .15s,color .15s}
+  .chip:hover{background:#ffe0b2;color:#e65100}
+  .chip span{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chip button{border:0;background:transparent;width:22px;height:22px;border-radius:50%;cursor:pointer;color:#757575;font-size:14px;line-height:1;display:grid;place-items:center}
+  .chip button:hover{background:rgba(0,0,0,.1);color:#d32f2f}
+  .empty{color:#9e9e9e;font-style:italic;font-size:14px}
+
+  #snack{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#323232;color:#fff;padding:12px 22px;border-radius:2px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:999;max-width:90vw;text-align:center}
+  #snack.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1><span class="material-icons">search</span> Супер Йцукен</h1>
+
+  <div class="card" id="authBox">
+    <div class="status">
+      <span class="material-icons">account_circle</span>
+      <span id="authLabel">Гость</span>
+    </div>
+
+    <div class="forms" id="forms">
+      <input id="userInput" type="text" placeholder="Логин" autocomplete="username">
+      <input id="passInput" type="password" placeholder="Пароль" autocomplete="current-password">
+      <button class="btn" id="loginBtn" type="button">Вход</button>
+      <button class="btn accent" id="regBtn" type="button">Регистрация</button>
+    </div>
+
+    <div id="logoutBox">
+      <button class="btn flat" id="logoutBtn" type="button">
+        <span class="material-icons">exit_to_app</span> Выйти
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="searchRow">
+      <span class="material-icons">search</span>
+      <input id="q" type="text" placeholder="Введите запрос..." autocomplete="off">
+      <button class="btn" id="go" type="button">Искать!</button>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-e="bing" type="button">Bing</button>
+      <button class="tab" data-e="google" type="button">Google</button>
+      <button class="tab" data-e="duck" type="button">DuckDuckGo</button>
+      <button class="tab" data-e="yandex" type="button">Яндекс</button>
+    </div>
+
+    <div id="frameWrap">
+      <div class="frameHead">
+        <span id="frameTitle">Результаты</span>
+        <button class="btn flat" id="openExt" type="button">
+          <span class="material-icons">open_in_new</span> В новой вкладке
+        </button>
+      </div>
+      <iframe id="frame" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-scripts allow-same-origin"></iframe>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="histHead">
+      <h2><span class="material-icons">history</span> История запросов</h2>
+      <button class="btn flat" id="clearAll" type="button">
+        <span class="material-icons">delete_sweep</span> Очистить всё
+      </button>
+    </div>
+    <ul id="histList"></ul>
+  </div>
+
+</div>
+
+<div id="snack"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  var memory = {};
+  var storageOK = true;
+
+  try {
+    localStorage.setItem('__test__', '1');
+    localStorage.removeItem('__test__');
+  } catch(e) {
+    storageOK = false;
+  }
+
+  function storeGet(key){
+    if(storageOK){ try { return localStorage.getItem(key); } catch(e){} }
+    return memory[key] !== undefined ? memory[key] : null;
+  }
+  function storeSet(key, val){
+    if(storageOK){ try { localStorage.setItem(key, val); return; } catch(e){} }
+    memory[key] = val;
+  }
+  function storeRemove(key){
+    if(storageOK){ try { localStorage.removeItem(key); return; } catch(e){} }
+    delete memory[key];
+  }
+
+  var ENGINES = {
+    bing:   'https://www.bing.com/search?q=',
+    google: 'https://www.google.com/search?q=',
+    duck:   'https://duckduckgo.com/?q=',
+    yandex: 'https://yandex.com/search/?text='
+  };
+  var engine = 'bing';
+
+  var K_USERS   = 'md1_users';
+  var K_CURRENT = 'md1_current';
+  var K_HIST    = 'md1_hist_';
+
+  var authLabel = document.getElementById('authLabel');
+  var forms     = document.getElementById('forms');
+  var logoutBox = document.getElementById('logoutBox');
+  var userInput = document.getElementById('userInput');
+  var passInput = document.getElementById('passInput');
+  var loginBtn  = document.getElementById('loginBtn');
+  var regBtn    = document.getElementById('regBtn');
+  var logoutBtn = document.getElementById('logoutBtn');
+
+  var qInput     = document.getElementById('q');
+  var goBtn      = document.getElementById('go');
+  var tabs       = document.getElementById('tabs');
+  var frameWrap  = document.getElementById('frameWrap');
+  var frame      = document.getElementById('frame');
+  var frameTitle = document.getElementById('frameTitle');
+  var openExt    = document.getElementById('openExt');
+  var histList   = document.getElementById('histList');
+  var clearAll   = document.getElementById('clearAll');
+  var snack      = document.getElementById('snack');
+
+  var snackTimer;
+  function toast(msg){
+    snack.textContent = msg;
+    snack.classList.add('show');
+    clearTimeout(snackTimer);
+    snackTimer = setTimeout(function(){ snack.classList.remove('show'); }, 2200);
+  }
+
+  function getUsers(){
+    var raw = storeGet(K_USERS);
+    if(!raw) return {};
+    try { return JSON.parse(raw) || {}; } catch(e){ return {}; }
+  }
+  function saveUsers(u){ storeSet(K_USERS, JSON.stringify(u)); }
+  function current(){ return storeGet(K_CURRENT); }
+  function setCurrent(u){
+    if(u) storeSet(K_CURRENT, u);
+    else storeRemove(K_CURRENT);
+  }
+
+  function histKey(){ return K_HIST + (current() || 'guest'); }
+  function getHist(){
+    var raw = storeGet(histKey());
+    if(!raw) return [];
+    try { return JSON.parse(raw) || []; } catch(e){ return []; }
+  }
+  function saveHist(h){ storeSet(histKey(), JSON.stringify(h)); }
+
+  function updateAuthUI(){
+    var user = current();
+    if(user){
+      authLabel.textContent = 'Вы вошли как: ' + user;
+      forms.style.display = 'none';
+      logoutBox.style.display = 'flex';
+    } else {
+      authLabel.textContent = 'Гость';
+      forms.style.display = 'flex';
+      logoutBox.style.display = 'none';
+    }
+  }
+
+  function renderHistory(){
+    histList.innerHTML = '';
+    var h = getHist();
+    if(!h.length){
+      var li = document.createElement('li');
+      li.className = 'empty';
+      li.textContent = 'Здесь появятся ваши запросы';
+      histList.appendChild(li);
+      return;
+    }
+    h.forEach(function(text){
+      var li = document.createElement('li');
+      li.className = 'chip';
+
+      var span = document.createElement('span');
+      span.textContent = text;
+      span.title = text;
+      span.onclick = function(){ qInput.value = text; qInput.focus(); };
+
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.textContent = '✕';
+      del.title = 'Удалить';
+      del.onclick = function(e){
+        e.stopPropagation();
+        saveHist(getHist().filter(function(x){ return x !== text; }));
+        renderHistory();
+      };
+
+      li.appendChild(span);
+      li.appendChild(del);
+      histList.appendChild(li);
+    });
+  }
+
+  function addHist(q){
+    q = String(q).trim();
+    if(!q) return;
+    var h = getHist().filter(function(x){ return x !== q; });
+    h.unshift(q);
+    saveHist(h.slice(0, 20));
+    renderHistory();
+  }
+
+  function doLogin(){
+    var name = userInput.value.trim();
+    var pass = passInput.value.trim();
+    if(!name || !pass){ toast('Заполните логин и пароль'); return; }
+    var all = getUsers();
+    if(!all[name]){ toast('Пользователь не найден'); return; }
+    if(all[name] !== pass){ toast('Неверный пароль'); return; }
+    setCurrent(name);
+    userInput.value = '';
+    passInput.value = '';
+    updateAuthUI();
+    renderHistory();
+    toast('Вы вошли как ' + name);
+  }
+
+  function doRegister(){
+    var name = userInput.value.trim();
+    var pass = passInput.value.trim();
+    if(!name || !pass){ toast('Заполните логин и пароль'); return; }
+    if(pass.length < 3){ toast('Пароль минимум 3 символа'); return; }
+    var all = getUsers();
+    if(all[name]){ toast('Пользователь уже существует'); return; }
+    all[name] = pass;
+    saveUsers(all);
+    setCurrent(name);
+    userInput.value = '';
+    passInput.value = '';
+    updateAuthUI();
+    renderHistory();
+    toast('Регистрация успешна! Вы вошли как ' + name);
+  }
+
+  function doLogout(){
+    setCurrent(null);
+    updateAuthUI();
+    renderHistory();
+    toast('Вы вышли');
+  }
+
+  function doSearch(){
+    var q = qInput.value.trim();
+    if(!q){ qInput.focus(); toast('Введите запрос'); return; }
+    addHist(q);
+    var url = ENGINES[engine] + encodeURIComponent(q);
+    frame.src = url;
+    frameTitle.textContent = 'Результаты: ' + q;
+    frameWrap.classList.add('open');
+    frameWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  loginBtn.addEventListener('click', doLogin);
+  regBtn.addEventListener('click', doRegister);
+  logoutBtn.addEventListener('click', doLogout);
+
+  passInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') doLogin(); });
+  userInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') doLogin(); });
+
+  goBtn.addEventListener('click', doSearch);
+  qInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') doSearch(); });
+
+  tabs.addEventListener('click', function(e){
+    var t = e.target.closest('.tab');
+    if(!t) return;
+    var all = tabs.querySelectorAll('.tab');
+    for(var i = 0; i < all.length; i++) all[i].classList.remove('active');
+    t.classList.add('active');
+    engine = t.dataset.e;
+  });
+
+  openExt.addEventListener('click', function(){
+    var src = frame.getAttribute('src');
+    if(src && src !== 'about:blank') window.open(src, '_blank', 'noopener');
+    else toast('Сначала выполните поиск');
+  });
+
+  clearAll.addEventListener('click', function(){
+    if(!getHist().length){ toast('История пуста'); return; }
+    saveHist([]);
+    renderHistory();
+    toast('История очищена');
+  });
+
+  updateAuthUI();
+  renderHistory();
+
+  if(!storageOK){
+    setTimeout(function(){
+      toast('Хранилище браузера недоступно — данные не сохранятся после перезагрузки');
+    }, 600);
+  }
+
+})();
+</script>
+</body>
+        </html>
